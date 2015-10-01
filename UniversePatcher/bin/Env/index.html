@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			*{ font-family: Arial,sans-serif !important; }
+			
+			html{
+				/*background-image: url('UniverseMap_I80.png');*/
+				background-color: rgb(255, 192, 255);
+				background-size: cover;
+			}
+			
+			body{
+				position: relative;
+			}
+			
+			.patcher{
+				background-image: url('res/Patcher_Border.png');
+				height: 649px;
+				width: 1005px;
+				margin: 0 auto;
+				background-color: rgba(0,0,0,0);
+				border-radius: 27px;
+				padding-top: 108px;
+				box-sizing: border-box;
+				position: relative;
+			}
+			
+			.window{
+				background-color: #FFF;
+				margin: 0 15px 0 14px;
+				height: 422px;
+				border-radius: 12px;
+			}
+			
+			#close{
+				width: 31px;
+				height: 29px;
+				background-color: #000;
+				position: absolute;
+				top: 79px;
+				right: 8px;
+				background-image: url('res/Close_Normal.png');
+				background-repeat: no-repeat;
+				background-position: top right;
+			}
+			
+			#close:hover{
+				background-image: url('res/Close_Red.png');
+				cursor: pointer;
+			}
+			
+			#close:active{
+				background-image: url('res/Close_Press.png');
+			}
+			
+			#minimize{
+				width: 31px;
+				height: 29px;
+				background-color: #000;
+				position: absolute;
+				top: 79px;
+				right: 39px;
+				background-image: url('res/Minimize_Normal.png');
+				background-repeat: no-repeat;
+				background-position: top left;
+			}
+			
+			#minimize:hover{
+				background-image: url('res/Minimize_Over.png');
+				cursor: pointer;
+			}
+			
+			#minimize:active{
+				background-image: url('res/Minimize_Press.png');
+			}
+			
+			.menu{
+				background-color: #000;
+				height: 110px;
+				margin: 6px 13px 0 3px;
+				border-bottom-left-radius: 40px;
+				border-bottom-right-radius: 39px;
+				position: relative;
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			}
+			
+			#start{
+				width: 205px;
+				height: 85px;
+				background-color: #000;
+				position: absolute;
+				top: 5px;
+				right: 8px;
+				background-image: url('res/Start.png');
+				background-repeat: no-repeat;
+				background-position: top right;
+				border: 0;
+				font-size: 23pt;
+				font-weight: bold;
+				color: #FFF;
+				text-align: center;
+				padding: 25px;
+				box-sizing: border-box;
+				text-decoration: none;
+			}
+			
+			#start:hover{
+				background-image: url('res/Start_Over.png');
+				cursor: pointer;
+			}
+			
+			#start:active{
+				background-image: url('res/Start.png');
+			}
+			
+			a.button{
+				background-repeat: no-repeat;
+				background-position: center left;
+				padding: 13px 13px 13px 52px;
+				display: block;
+				box-sizing: border-box;
+				position: absolute;
+				height: 45px;
+				bottom: 13px;
+				color: #888;
+				text-decoration: none;
+				font-weight: bold;
+				font-size: 80%;
+			}
+			
+			a.button:hover{
+				color: #FFF;
+				cursor: pointer;
+			}
+			
+			a#help.button{
+				background-image: url('res/Help_Normal.png');
+				left: 120px;
+			}
+			
+			a#help.button:hover{
+				background-image: url('res/Help_Over.png');
+			}
+			
+			a#help.button:active{
+				background-image: url('res/Help_Down.png');
+			}
+			
+			a#settings.button{
+				background-image: url('res/Options_Normal.png');
+				left: 274px;
+			}
+			
+			a#settings.button:hover{
+				background-image: url('res/Options_Over.png');
+			}
+			
+			a#settings.button:active{
+				background-image: url('res/Options_Down.png');
+			}
+			
+			a#universe.button{
+				background-image: url('res/US Flag Normal.png');
+				left: 447px;
+				width: 400px;
+			}
+			
+			a#universe.button:hover{
+				background-image: url('res/US Flag Over.png');
+			}
+			
+			a#universe.button:active{
+				background-image: url('res/US Flag Down.png');
+			}
+			
+			a#universe.button:after{
+				content: attr(name);
+			}
+			
+			#universe-selection{
+				position: absolute;
+				top: 225px;
+				left: 302px;
+				right: 302px;
+				bottom: 155px;
+				background-image: url('res/Large Background.png');
+			}
+			
+			#universe-selection>div{
+				position: relative;
+				margin: 0;
+			}
+			
+			#universe-selection>div:before{
+				content: "";
+				background-image: url('res/Universe Select Icon.png');
+				width: 41px;
+				height:48px;
+				display: block;
+				position: absolute;
+				top: 10px;
+				left: 10px;
+			}
+			
+			#universe-selection>div>h3{
+				text-align: center;
+				font-size: bold;
+				margin: 0;
+				padding: 0.8em;
+				font-size: 1.3em;
+			}
+			
+			#uclose{
+				background-image: url('res/Close Normal.png');
+				width: 20px;
+				height: 20px;
+				display: block;
+				position: absolute;
+				top: 10px;
+				right: 10px;
+			}
+			
+			#uclose:hover{
+				background-image: url('res/Close Over.png');
+				cursor: pointer;
+			}
+			
+			#uselect{
+				width: 273px;
+				height: 122px;
+				background-image: url('res/Universe Selection BG.png');
+				margin: 0 auto;
+			}
+			
+			#uselect>div{
+				padding: 5px;
+			}
+			
+			#uselect>div>a{
+				width: 100%;
+				
+				display: block;
+				padding: 2px 15px;
+				border-radius: 20px;
+				box-sizing: border-box;
+				font-weight: bold;
+				color: #FFF;
+			}
+			
+			#uselect>div>a[cc="de"]:before, #uselect>div>a[cc="uk"]:before, #uselect>div>a[cc="us"]:before{
+				content: "";
+				margin-right: 10px;
+				height: 18px;
+				width: 26px;
+				display: inline-block;
+				vertical-align: top;
+			}
+			
+			#uselect>div>a[cc="de"]:before{
+				background-image: url('res/German Flag.png');
+			}
+			
+			#uselect>div>a[cc="uk"]:before{
+				background-image: url('res/British Flag.png');
+			}
+			
+			#uselect>div>a[cc="us"]:before{
+				background-image: url('res/US Flag.png');
+			}
+			
+			#uselect>div>a.selected{
+				background-color: #F58A10;
+				cursor: default;
+			}
+			
+			#uselect>div>a:not(.selected){
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="patcher">
+			<a id="close"></a>
+			<a id="minimize"></a>
+			<div class="window">
+				<iframe id="frame" src="res/Default.html" style="width: 100%; height: 100%; border:0;"></iframe>
+			</div>
+			<div class="menu">
+				<a id="start">Play!</a>
+				<a id="help" class="button">Help</a>
+				<a id="settings" class="button">Settings</a>
+				<a id="universe" class="button" name="{Universe}">You're playing on </a>
+			</div>
+		</div>
+		<div id="universe-selection" style="display: none;">
+			<div>
+				<h3>Universe Selection</h3>
+				<a id="uclose"></a>
+				<p style="font-size: 12px; font-weight: bold; padding: 0 40px;">
+					Characters are unique to their Universe. If you change your Universe, your character will remain in the old Universe.
+				</p>
+				<div id="uselect">
+					<div id="uselect-s"></div>
+				</div>
+			</div>
+		</div>
+		<script>
+			patcher.ready();
+		</script>
+	</body>
+</html>

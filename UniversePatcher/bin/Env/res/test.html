@@ -1,0 +1,78 @@
+<html>
+<head>
+<script type="text/javascript">
+
+function trackProgress(string)
+{
+	document.getElementById('debug').value += string + "\n";
+}
+
+function patcherStat_10percent() {
+
+    trackProgress('10');
+
+}
+
+ 
+
+function patcherStat_25percent() {
+
+    trackProgress('25');
+
+}
+
+ 
+
+function patcherStat_50percent() {
+
+    trackProgress('50');
+
+}
+
+ 
+
+function patcherStat_75percent() {
+
+    trackProgress('75');
+
+}
+
+ 
+
+function patcherStat_100percent() {
+
+    trackProgress('100');
+
+}
+
+ 
+
+function patcherStat_PlayPressed() {
+
+    trackProgress('play');
+
+}
+
+ 
+
+function patcherStat_NoPatchingNeeded() {
+
+    trackProgress('noupdates');
+
+}
+
+</script>
+</head>
+
+<body>
+<textarea id="debug" style="width: 240px; height: 200px;">
+</textarea>
+<div>
+<button onclick="awesomium.luLogin('user1', 'pass1');">Login</button>
+<button onclick="awesomium.luLoginIsValid('false');">Login Success</button>
+</div>
+<script type="text/javascript" language="JavaScript">
+  <!patcherStat_25percent();>
+</script>
+</body>
+</html>

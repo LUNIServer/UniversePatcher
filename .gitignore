@@ -1,0 +1,6 @@
+Debug/
+Release/
+publish/
+obj/
+*.user
+*.suo
