@@ -5,33 +5,57 @@ Public Class Form1
     Dim LauncherFrameObject As JSObject
     Dim LauncherUniverseButton As JSObject
 
+    Dim Env As WebServiceResult = Nothing
+    'AccountData
+    Dim SendPasswordUrl As String
+    Dim SignInUrl As String
+    Dim SignUpUrl As String
+    'GameData
+    Dim ClientUrl As String
+    Dim CrashLogUrl As String
     Dim launcherURL As String
+
+    'Servers
+    Dim ServerList As New List(Of ServerInfo)
+    Dim Suggested As Integer = 0
+    Dim Selected As Integer = 0
+    '--------
 
     Dim ConfigUrl As String
     Dim StatusUrl As String
 
-    Dim clientURL As String
+    Dim clientPath As String
 
     Dim patcherUrl As Uri
 
-    Dim Env As WebServiceResult = Nothing
-    Dim ServerList As New List(Of ServerInfo)
-    Dim Suggested As Integer = 0
-    Dim Selected As Integer = 0
-
+    'Awesomium
     Dim FRAME As JSObject
 
     Public Structure ServerInfo
+        Public AuthenticationIP As String
+        Public CdnInfo As CdnInfo
+        Public DataCenterId As Integer
+        Public Language As String
+        Public LogLevel As Integer
         Public Name As String
-        Public Address As String
         Public Suggested As Boolean
+        Public UgcCdnInfo As CdnInfo
+        Public Use3DServices As Boolean
+    End Structure
+
+    Public Structure CdnInfo
+        Public CpCode As Integer
+        Public PatcherDir As String
+        Public PatcherUrl As String
+        Public Secure As Boolean
+        Public UseDlm As Boolean
     End Structure
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Dim INI As StreamReader = My.Computer.FileSystem.OpenTextFileReader(My.Computer.FileSystem.CurrentDirectory + "\lunipatcher.ini")
         Dim line As String = ""
 
-        clientURL = "..\client"
+        clientPath = "..\client"
         Dim serverURL As String = "http://localhost/UniverseConfig/UniverseConfig.svc"
 
         While Not INI.EndOfStream
@@ -41,7 +65,7 @@ Public Class Form1
                     serverURL = line.Substring(10)
                 End If
                 If (line.StartsWith("ClientUrl=")) Then
-                    clientURL = line.Substring(10)
+                    clientPath = line.Substring(10)
                 End If
             End If
         End While
@@ -66,11 +90,35 @@ Public Class Form1
         Dim ConfigService As New WebService(Me.ConfigUrl)
         Env = Service.getData("EnvironmentInfo")
 
+        Dim AccountInfo As Integer = Env.getElement("AccountInfo")
+        If (AccountInfo > 0) Then
+            Dim SendPasswordUrlNode As Integer = Env.getElement("SendPasswordUrl", AccountInfo)
+            If (SendPasswordUrlNode > 0) Then
+                Me.SendPasswordUrl = Env.Elements.Item(SendPasswordUrlNode).Text
+            End If
+            Dim SignInUrlNode As Integer = Env.getElement("SignInUrl", AccountInfo)
+            If (SignInUrlNode > 0) Then
+                Me.SignInUrl = Env.Elements.Item(SignInUrlNode).Text
+            End If
+            Dim SignUpUrlNode As Integer = Env.getElement("SignUpUrl", AccountInfo)
+            If (SignUpUrlNode > 0) Then
+                Me.SignUpUrl = Env.Elements.Item(SignUpUrlNode).Text
+            End If
+        End If
+
         Dim GameInfo As Integer = Env.getElement("GameInfo")
         If (GameInfo > 0) Then
             Dim LauncherURL2 As Integer = Env.getElement("LauncherUrl2", GameInfo)
             If (LauncherURL2 > 0) Then
                 Me.launcherURL = Env.Elements.Item(LauncherURL2).Text
+            End If
+            Dim ClientUrlNode As Integer = Env.getElement("ClientUrl", GameInfo)
+            If (ClientUrlNode > 0) Then
+                Me.ClientUrl = Env.Elements.Item(ClientUrlNode).Text
+            End If
+            Dim CrashLogUrlNode As Integer = Env.getElement("CrashLogUrl", GameInfo)
+            If (CrashLogUrlNode > 0) Then
+                Me.CrashLogUrl = Env.Elements.Item(CrashLogUrlNode).Text
             End If
         End If
 
@@ -86,13 +134,37 @@ Public Class Form1
                             Case "Name"
                                 Info.Name = .Text
                             Case "AuthenticationIP"
-                                Info.Address = .Text
+                                Info.AuthenticationIP = .Text
                             Case "Suggested"
                                 If (.Text = "true") Then
                                     Info.Suggested = True
                                 Else
                                     Info.Suggested = False
                                 End If
+                            Case "CdnInfo"
+                                For Each cdni As Integer In .Childs
+                                    Dim cde As Element = Env.Elements.Item(cdni)
+                                    Select Case cde.Name
+                                        Case "CpCode"
+                                            Info.CdnInfo.CpCode = cde.Text
+                                        Case "PatcherDir"
+                                            Info.CdnInfo.PatcherDir = cde.Text
+                                        Case "PatcherUrl"
+                                            Info.CdnInfo.PatcherUrl = cde.Text
+                                        Case "Secure"
+                                            Info.CdnInfo.Secure = Boolean.Parse(cde.Text)
+                                        Case "UseDlm"
+                                            Info.CdnInfo.UseDlm = Boolean.Parse(cde.Text)
+                                    End Select
+                                Next
+                            Case "DataCenterId"
+                                Info.DataCenterId = Integer.Parse(.Text)
+                            Case "LogLevel"
+                                Info.LogLevel = Integer.Parse(.Text)
+                            Case "Language"
+                                Info.Language = .Text
+                            Case "Use3DServices"
+                                Info.Use3DServices = Boolean.Parse(.Text)
                         End Select
                     End With
                 Next
@@ -114,23 +186,23 @@ Public Class Form1
 
         Dim boot As New LDF
         boot.WriteString("SERVERNAME", ServerList(Selected).Name)
-        boot.WriteString("PATCHSERVERIP", "services.lego.com")
-        boot.WriteString("AUTHSERVERIP", ServerList(Selected).Address)
-        boot.WriteInteger("PATCHSERVERPORT", 80)
-        boot.WriteInteger("LOGGING", 100)
-        boot.WriteUnsignedInt("DATACENTERID", "1")
-        boot.WriteInteger("CPCODE", 89164)
-        boot.WriteBoolean("AKAMAIDLM", False)
-        boot.WriteString("PATCHSERVERDIR", "UniversePatcher/lu/luclient")
-        boot.WriteBoolean("UGCUSE3DSERVICES", True)
-        boot.WriteString("UGCSERVERIP", "services.lego.com")
-        boot.WriteString("UGCSERVERDIR", "UniversePatcher/lu/luclient")
-        boot.WriteString("PASSURL", "http://services.lego.com/UniverseLauncher/index.php?page=sendPassword&username=")
-        boot.WriteString("SIGNINURL", "http://services.lego.com/UniverseLauncher/index.php")
-        boot.WriteString("SIGNUPURL", "http://services.lego.com/UniverseLauncher/index.php?page=register")
-        boot.WriteString("REGISTERURL", "http://services.lego.com/UniverseLauncher/Registration.php?username=")
-        boot.WriteString("CRASHLOGURL", "http://services.lego.com/UniverseLauncher/CrashLog.php")
-        boot.WriteString("LOCALE", "en_US")
+        boot.WriteString("PATCHSERVERIP", ServerList(Selected).CdnInfo.PatcherUrl)
+        boot.WriteString("AUTHSERVERIP", ServerList(Selected).AuthenticationIP)
+        boot.WriteInteger("PATCHSERVERPORT", 80) 'Currently default, need parsing
+        boot.WriteInteger("LOGGING", ServerList(Selected).LogLevel)
+        boot.WriteUnsignedInt("DATACENTERID", ServerList(Selected).DataCenterId)
+        boot.WriteInteger("CPCODE", ServerList(Selected).CdnInfo.CpCode)
+        boot.WriteBoolean("AKAMAIDLM", ServerList(Selected).CdnInfo.Secure)
+        boot.WriteString("PATCHSERVERDIR", ServerList(Selected).CdnInfo.PatcherDir)
+        boot.WriteBoolean("UGCUSE3DSERVICES", ServerList(Selected).Use3DServices)
+        boot.WriteString("UGCSERVERIP", ServerList(Selected).UgcCdnInfo.PatcherUrl)
+        boot.WriteString("UGCSERVERDIR", ServerList(Selected).UgcCdnInfo.PatcherDir)
+        boot.WriteString("PASSURL", Me.SendPasswordUrl)
+        boot.WriteString("SIGNINURL", Me.SignInUrl)
+        boot.WriteString("SIGNUPURL", Me.SignUpUrl)
+        boot.WriteString("REGISTERURL", Me.ClientUrl)
+        boot.WriteString("CRASHLOGURL", Me.CrashLogUrl)
+        boot.WriteString("LOCALE", ServerList(Selected).Language)
         boot.WriteString("MANIFESTFILE", "trunk.txt")
         boot.WriteBoolean("TRACK_DSK_USAGE", True)
         boot.WriteUnsignedInt("HD_SPACE_FREE", 1244987)
@@ -139,15 +211,15 @@ Public Class Form1
 
         Dim bootFile As String = boot.getResult()
 
-        My.Computer.FileSystem.WriteAllText(clientURL & "\boot.cfg", bootFile, False)
+        My.Computer.FileSystem.WriteAllText(clientPath & "\boot.cfg", bootFile, False)
 
         'MsgBox(bootFile)
 
         Dim clientProcess As New Process
-        Dim f As String = clientURL & "\legouniverse.exe"
+        Dim f As String = clientPath & "\legouniverse.exe"
         'MsgBox(f)
         clientProcess.StartInfo.FileName = f
-        clientProcess.StartInfo.WorkingDirectory = clientURL
+        clientProcess.StartInfo.WorkingDirectory = clientPath
         clientProcess.Start()
         Return JSValue.Null
     End Function
