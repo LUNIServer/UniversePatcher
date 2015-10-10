@@ -28,8 +28,15 @@ Public Class Form1
 
     Dim patcherUrl As Uri
 
+    Dim Language As String = "default"
+
     'Awesomium
     Dim FRAME As JSObject
+
+    Dim L_US As JSObject
+    Dim L_UK As JSObject
+    Dim L_DE As JSObject
+    Dim NOL As JSObject
 
     Public Structure ServerInfo
         Public AuthenticationIP As String
@@ -202,7 +209,14 @@ Public Class Form1
         boot.WriteString("SIGNUPURL", Me.SignUpUrl)
         boot.WriteString("REGISTERURL", Me.ClientUrl)
         boot.WriteString("CRASHLOGURL", Me.CrashLogUrl)
-        boot.WriteString("LOCALE", ServerList(Selected).Language)
+
+        If (Language = "default") Then
+            boot.WriteString("LOCALE", ServerList(Selected).Language)
+        Else
+            boot.WriteString("LOCALE", Language)
+        End If
+
+
         boot.WriteString("MANIFESTFILE", "trunk.txt")
         boot.WriteBoolean("TRACK_DSK_USAGE", True)
         boot.WriteUnsignedInt("HD_SPACE_FREE", 1244987)
@@ -263,6 +277,13 @@ Public Class Form1
         Dim UNIVERSE As JSObject = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""universe"")")
         Dim USELECTS As JSObject = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""uselect-s"")")
         Dim UCLOSE As JSObject = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""uclose"")")
+        Dim SCLOSE As JSObject = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""sclose"")")
+
+        L_US = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""lus"")")
+        L_UK = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""luk"")")
+        L_DE = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""lde"")")
+        NOL = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""nl"")")
+
         FRAME.Property("src") = Me.launcherURL
         CLOSE.BindAsync("onclick", AddressOf closeButton)
         MINIMIZE.BindAsync("onclick", AddressOf minimizeButton)
@@ -271,6 +292,12 @@ Public Class Form1
         HELP.BindAsync("onclick", AddressOf openHelp)
         UNIVERSE.BindAsync("onclick", AddressOf openUniverseSelection)
         UCLOSE.BindAsync("onclick", AddressOf closeUniverseSelection)
+        SCLOSE.BindAsync("onclick", AddressOf closeSettings)
+
+        L_US.BindAsync("onclick", AddressOf setAmerican)
+        L_UK.BindAsync("onclick", AddressOf setBritish)
+        L_DE.BindAsync("onclick", AddressOf setGerman)
+        NOL.BindAsync("onclick", AddressOf setServerDefault)
 
         If (ServerList.Count > 0) Then
             UNIVERSE.Property("name") = ServerList.Item(Selected).Name
@@ -278,18 +305,80 @@ Public Class Form1
                 Dim newElement As JSObject = WebControl1.ExecuteJavascriptWithResult("document.createElement('a')")
                 newElement.Property("id") = "universe-" & k.ToString
                 newElement.Property("innerHTML") = ServerList.Item(k).Name
-                If (k = Selected) Then
-                    newElement.Property("className") = "selected"
+                Dim classname As String = ""
+                If (ServerList.Item(k).Language.Equals("en_US")) Then
+                    classname = "us"
                 End If
+                If (ServerList.Item(k).Language.Equals("en_GB")) Then
+                    classname = "uk"
+                End If
+                If (ServerList.Item(k).Language.Equals("de_DE")) Then
+                    classname = "de"
+                End If
+                If (k = Selected) Then
+                    If (Not classname.Equals("")) Then
+                        classname = classname + " "
+                    End If
+                    classname = classname + "selected"
+                End If
+                newElement.Property("className") = classname
                 newElement.BindAsync("onclick", New JSFunctionAsyncHandler(AddressOf selectUniverse))
                 USELECTS.Invoke("appendChild", {newElement})
             Next
         End If
+
+        UpdateLanguage()
+
+        Return JSValue.Null
+    End Function
+
+    Private Function setGerman(arguments() As JSValue) As JSValue
+        Me.Language = "de_DE"
+        L_US.Property("className") = "us"
+        L_UK.Property("className") = "uk"
+        L_DE.Property("className") = "de selected"
+        NOL.Property("className") = "nolang"
+        UpdateLanguage()
+        Return JSValue.Null
+    End Function
+
+    Private Function setAmerican(arguments() As JSValue) As JSValue
+        Me.Language = "en_US"
+        L_US.Property("className") = "us selected"
+        L_UK.Property("className") = "uk"
+        L_DE.Property("className") = "de"
+        NOL.Property("className") = "nolang"
+        UpdateLanguage()
+        Return JSValue.Null
+    End Function
+
+    Private Function setBritish(arguments() As JSValue) As JSValue
+        Me.Language = "en_GB"
+        L_US.Property("className") = "us"
+        L_UK.Property("className") = "uk selected"
+        L_DE.Property("className") = "de"
+        NOL.Property("className") = "nolang"
+        UpdateLanguage()
+        Return JSValue.Null
+    End Function
+
+    Private Function setServerDefault(arguments() As JSValue) As JSValue
+        Me.Language = "default"
+        L_US.Property("className") = "us"
+        L_UK.Property("className") = "uk"
+        L_DE.Property("className") = "de"
+        NOL.Property("className") = "nolang selected"
+        UpdateLanguage()
         Return JSValue.Null
     End Function
 
     Private Function openSettings(arguments() As JSValue) As JSValue
-        WebControl1.Reload(True)
+        WebControl1.ExecuteJavascript("document.getElementById('settings-panel').style.display = 'block'")
+        Return JSValue.Null
+    End Function
+
+    Private Function closeSettings(arguments() As JSValue) As JSValue
+        WebControl1.ExecuteJavascript("document.getElementById('settings-panel').style.display = 'none'")
         Return JSValue.Null
     End Function
 
@@ -304,7 +393,8 @@ Public Class Form1
     End Function
 
     Private Function openHelp(arguments() As JSValue) As JSValue
-        Process.Start("https://github.com/LUNIServer/")
+        'Process.Start("https://github.com/LUNIServer/")
+        WebControl1.Reload(True)
         Return JSValue.Null
     End Function
 
@@ -313,20 +403,62 @@ Public Class Form1
             If (arguments(0).IsObject) Then
                 Dim ev As JSObject = arguments(0)
                 Dim t As JSObject = ev.Property("target")
-                ClearList()
-                t.Property("className") = "selected"
                 Dim num As String = t.Property("id").ToString().Substring(9)
                 Dim id As Integer = Integer.Parse(num)
                 Selected = id
+                RedrawList()
                 WebControl1.ExecuteJavascript("document.getElementById(""universe"").name = '" & ServerList(id).Name & "'")
+                UpdateLanguage()
             End If
         End If
         Return JSValue.Null
     End Function
 
-    Private Sub ClearList()
+    Private Sub RedrawList()
         For k = 0 To ServerList.Count - 1
-            WebControl1.ExecuteJavascript("document.getElementById('universe-" & k & "').className = ''")
+            Dim classname As String = ""
+            If (ServerList.Item(k).Language.Equals("en_US")) Then
+                classname = "us"
+            End If
+            If (ServerList.Item(k).Language.Equals("en_GB")) Then
+                classname = "uk"
+            End If
+            If (ServerList.Item(k).Language.Equals("de_DE")) Then
+                classname = "de"
+            End If
+            If (k = Selected) Then
+                If (Not classname.Equals("")) Then
+                    classname = classname + " "
+                End If
+                classname = classname + "selected"
+            End If
+            WebControl1.ExecuteJavascript("document.getElementById('universe-" & k & "').className = '" & classname & "'")
         Next
+    End Sub
+
+    Private Sub UpdateLanguage()
+        Dim classname As String = "button "
+        If (Language.Equals("default")) Then
+            If (ServerList.Item(Selected).Language.Equals("en_US")) Then
+                classname = classname & "us"
+            End If
+            If (ServerList.Item(Selected).Language.Equals("en_GB")) Then
+                classname = classname & "uk"
+            End If
+            If (ServerList.Item(Selected).Language.Equals("de_DE")) Then
+                classname = classname & "de"
+            End If
+        Else
+            If (Language.Equals("en_US")) Then
+                classname = classname & "us"
+            End If
+            If (Language.Equals("en_GB")) Then
+                classname = classname & "uk"
+            End If
+            If (Language.Equals("de_DE")) Then
+                classname = classname & "de"
+            End If
+        End If
+        WebControl1.ExecuteJavascript("document.getElementById(""universe"").className = '" & classname & "'")
     End Sub
 End Class

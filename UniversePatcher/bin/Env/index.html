@@ -166,24 +166,27 @@
 			}
 			
 			a#universe.button{
-				background-image: url('res/US Flag Normal.png');
 				left: 447px;
-				width: 400px;
+				width: 300px;
 			}
 			
-			a#universe.button:hover{
-				background-image: url('res/US Flag Over.png');
-			}
+			a#universe.button.us{ background-image: url('res/US Flag Normal.png'); }
+			a#universe.button.us:hover{	background-image: url('res/US Flag Over.png'); }
+			a#universe.button.us:active{ background-image: url('res/US Flag Down.png'); }
 			
-			a#universe.button:active{
-				background-image: url('res/US Flag Down.png');
-			}
+			a#universe.button.uk{ background-image: url('res/British Flag Normal.png'); }
+			a#universe.button.uk:hover{	background-image: url('res/British Flag Over.png'); }
+			a#universe.button.uk:active{ background-image: url('res/British Flag Down.png'); }
+			
+			a#universe.button.de{ background-image: url('res/German Flag Normal.png'); }
+			a#universe.button.de:hover{	background-image: url('res/German Flag Over.png'); }
+			a#universe.button.deactive{ background-image: url('res/German Flag Down.png'); }
 			
 			a#universe.button:after{
 				content: attr(name);
 			}
 			
-			#universe-selection{
+			.popup{
 				position: absolute;
 				top: 225px;
 				left: 302px;
@@ -192,7 +195,7 @@
 				background-image: url('res/Large Background.png');
 			}
 			
-			#universe-selection>div{
+			.popup>div{
 				position: relative;
 				margin: 0;
 			}
@@ -208,7 +211,7 @@
 				left: 10px;
 			}
 			
-			#universe-selection>div>h3{
+			.popup>div>h3{
 				text-align: center;
 				font-size: bold;
 				margin: 0;
@@ -216,7 +219,7 @@
 				font-size: 1.3em;
 			}
 			
-			#uclose{
+			#uclose, #sclose{
 				background-image: url('res/Close Normal.png');
 				width: 20px;
 				height: 20px;
@@ -226,23 +229,23 @@
 				right: 10px;
 			}
 			
-			#uclose:hover{
+			#uclose:hover, #sclose:hover{
 				background-image: url('res/Close Over.png');
 				cursor: pointer;
 			}
 			
-			#uselect{
+			.select-box{
 				width: 273px;
 				height: 122px;
 				background-image: url('res/Universe Selection BG.png');
 				margin: 0 auto;
 			}
 			
-			#uselect>div{
+			.select-box>div{
 				padding: 5px;
 			}
 			
-			#uselect>div>a{
+			.select-box>div>a{
 				width: 100%;
 				
 				display: block;
@@ -253,7 +256,7 @@
 				color: #FFF;
 			}
 			
-			#uselect>div>a[cc="de"]:before, #uselect>div>a[cc="uk"]:before, #uselect>div>a[cc="us"]:before{
+			.select-box>div>a.de:before, .select-box>div>a.uk:before, .select-box>div>a.us:before, .select-box>div>a.nolang:before{
 				content: "";
 				margin-right: 10px;
 				height: 18px;
@@ -262,24 +265,24 @@
 				vertical-align: top;
 			}
 			
-			#uselect>div>a[cc="de"]:before{
+			.select-box>div>a.de:before{
 				background-image: url('res/German Flag.png');
 			}
 			
-			#uselect>div>a[cc="uk"]:before{
+			.select-box>div>a.uk:before{
 				background-image: url('res/British Flag.png');
 			}
 			
-			#uselect>div>a[cc="us"]:before{
+			.select-box>div>a.us:before{
 				background-image: url('res/US Flag.png');
 			}
 			
-			#uselect>div>a.selected{
+			.select-box>div>a.selected{
 				background-color: #F58A10;
 				cursor: default;
 			}
 			
-			#uselect>div>a:not(.selected){
+			.select-box>div>a:not(.selected){
 				cursor: pointer;
 			}
 		</style>
@@ -298,15 +301,32 @@
 				<a id="universe" class="button" name="{Universe}">You're playing on </a>
 			</div>
 		</div>
-		<div id="universe-selection" style="display: none;">
+		<div id="universe-selection" style="display: none;" class="popup">
 			<div>
 				<h3>Universe Selection</h3>
 				<a id="uclose"></a>
 				<p style="font-size: 12px; font-weight: bold; padding: 0 40px;">
 					Characters are unique to their Universe. If you change your Universe, your character will remain in the old Universe.
 				</p>
-				<div id="uselect">
+				<div id="uselect" class="select-box">
 					<div id="uselect-s"></div>
+				</div>
+			</div>
+		</div>
+		<div id="settings-panel" style="display: none;" class="popup">
+			<div>
+				<h3 style="margin: 0;">Settings</h3>
+				<a id="sclose"></a>
+				<p style="font-size: 12px; font-weight: bold; padding: 0 40px; margin: 0 0 10px 0;">
+					Please only choose a language that your client supports
+				</p>
+				<div class="select-box">
+					<div>
+						<a class="nolang selected" id="nl">Server Default</a>
+						<a class="de" id="lde">Deutsch</a>
+						<a class="us" id="lus">American</a>
+						<a class="uk" id="luk">British</a>
+					</div>
 				</div>
 			</div>
 		</div>
