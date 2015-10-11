@@ -25,6 +25,8 @@ Public Class Form1
     Dim StatusUrl As String
 
     Dim clientPath As String
+    Dim serverURL As String
+    Dim ininame As String
 
     Dim patcherUrl As Uri
 
@@ -37,6 +39,7 @@ Public Class Form1
     Dim L_UK As JSObject
     Dim L_DE As JSObject
     Dim NOL As JSObject
+    Dim CP As JSObject
 
     Public Structure ServerInfo
         Public AuthenticationIP As String
@@ -59,23 +62,33 @@ Public Class Form1
     End Structure
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Dim INI As StreamReader = My.Computer.FileSystem.OpenTextFileReader(My.Computer.FileSystem.CurrentDirectory + "\lunipatcher.ini")
-        Dim line As String = ""
+        ininame = My.Computer.FileSystem.CurrentDirectory & "\lunipatcher.ini"
 
+        serverURL = "http://luniserver.com/UniverseConfig/UniverseConfig.svc"
         clientPath = "..\client"
-        Dim serverURL As String = "http://localhost/UniverseConfig/UniverseConfig.svc"
 
-        While Not INI.EndOfStream
-            line = INI.ReadLine()
-            If (line.Length > 10) Then
-                If (line.StartsWith("ConfigUrl=")) Then
-                    serverURL = line.Substring(10)
+        If (My.Computer.FileSystem.FileExists(ininame)) Then
+            Dim INI As StreamReader = My.Computer.FileSystem.OpenTextFileReader(ininame)
+            Dim line As String = ""
+
+            While Not INI.EndOfStream
+                line = INI.ReadLine()
+                If (line.Length > 10) Then
+                    If (line.StartsWith("ConfigUrl=")) Then
+                        serverURL = line.Substring(10)
+                    End If
+                    If (line.StartsWith("ClientUrl=")) Then
+                        clientPath = line.Substring(10)
+                    End If
                 End If
-                If (line.StartsWith("ClientUrl=")) Then
-                    clientPath = line.Substring(10)
-                End If
-            End If
-        End While
+            End While
+
+            INI.Close()
+        Else
+            WriteConfigFile()
+        End If
+
+        OpenFileDialog1.InitialDirectory = clientPath
 
         patcherUrl = New Uri("file:///" + My.Computer.FileSystem.CurrentDirectory + "\index.html")
         WebControl1.Source = patcherUrl
@@ -187,6 +200,15 @@ Public Class Form1
         End If
     End Sub
 
+    Private Sub WriteConfigFile()
+        Dim writer As StreamWriter = My.Computer.FileSystem.OpenTextFileWriter(ininame, False)
+        writer.WriteLine("[General]")
+        writer.WriteLine("ConfigUrl=" & serverURL)
+        writer.WriteLine("ClientUrl=" & clientPath)
+        writer.Flush()
+        writer.Close()
+    End Sub
+
     Private Function play(arguments() As JSValue) As JSValue
         'Dim FRAME_STYLE As JSObject = FRAME.Property("style")
         'FRAME_STYLE.Property("display") = "none"
@@ -278,6 +300,8 @@ Public Class Form1
         Dim USELECTS As JSObject = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""uselect-s"")")
         Dim UCLOSE As JSObject = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""uclose"")")
         Dim SCLOSE As JSObject = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""sclose"")")
+        Dim BROWSE As JSObject = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""chooseClient"")")
+        CP = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""CP"")")
 
         L_US = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""lus"")")
         L_UK = WebControl1.ExecuteJavascriptWithResult("document.getElementById(""luk"")")
@@ -293,11 +317,14 @@ Public Class Form1
         UNIVERSE.BindAsync("onclick", AddressOf openUniverseSelection)
         UCLOSE.BindAsync("onclick", AddressOf closeUniverseSelection)
         SCLOSE.BindAsync("onclick", AddressOf closeSettings)
+        BROWSE.BindAsync("onclick", AddressOf chooseClient)
 
         L_US.BindAsync("onclick", AddressOf setAmerican)
         L_UK.BindAsync("onclick", AddressOf setBritish)
         L_DE.BindAsync("onclick", AddressOf setGerman)
         NOL.BindAsync("onclick", AddressOf setServerDefault)
+
+        CP.Property("value") = Me.clientPath
 
         If (ServerList.Count > 0) Then
             UNIVERSE.Property("name") = ServerList.Item(Selected).Name
@@ -329,6 +356,21 @@ Public Class Form1
 
         UpdateLanguage()
 
+        Return JSValue.Null
+    End Function
+
+    Private Function chooseClient(arguments() As JSValue) As JSValue
+        OpenFileDialog1.ShowDialog()
+        If (OpenFileDialog1.CheckFileExists) Then
+            Dim f As FileInfo = New FileInfo(OpenFileDialog1.FileName)
+            Dim d As DirectoryInfo = f.Directory
+            If (d.Name.Equals("client")) Then
+                Me.clientPath = d.FullName
+                CP.Property("value") = d.FullName
+                OpenFileDialog1.InitialDirectory = d.FullName
+                WriteConfigFile()
+            End If
+        End If
         Return JSValue.Null
     End Function
 
@@ -393,8 +435,8 @@ Public Class Form1
     End Function
 
     Private Function openHelp(arguments() As JSValue) As JSValue
-        'Process.Start("https://github.com/LUNIServer/")
-        WebControl1.Reload(True)
+        Process.Start("https://github.com/LUNIServer/UniversePatcher/wiki")
+        'WebControl1.Reload(True)
         Return JSValue.Null
     End Function
 

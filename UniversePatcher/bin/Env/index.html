@@ -12,6 +12,12 @@
 			
 			body{
 				position: relative;
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				-khtml-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
 			}
 			
 			.patcher{
@@ -24,6 +30,7 @@
 				padding-top: 108px;
 				box-sizing: border-box;
 				position: relative;
+				cursor: default;
 			}
 			
 			.window{
@@ -285,6 +292,41 @@
 			.select-box>div>a:not(.selected){
 				cursor: pointer;
 			}
+			
+			.text{
+				border-radius: 20px;
+				padding: 3px 5px;
+			}
+			
+			.centered{
+				display: block;
+				width: 273px;
+				margin: 0 auto;
+			}
+			
+			.infotext{
+				font-weight: bold;
+				font-size: 10pt;
+			}
+			
+			.btn{
+				padding: 6px 12px;
+				background-color: #DC7C0E;
+				color: #FFF;
+				font-weight: bold;
+				font-size: 12px;
+				margin: 0;
+				border-radius: 20px;
+				cursor: pointer;
+			}
+			
+			.btn:hover{
+				background-color: #B2650C;
+			}
+			
+			.btn:active{
+				background-color: #000000;
+			}
 		</style>
 	</head>
 	<body>
@@ -317,17 +359,25 @@
 			<div>
 				<h3 style="margin: 0;">Settings</h3>
 				<a id="sclose"></a>
-				<p style="font-size: 12px; font-weight: bold; padding: 0 40px; margin: 0 0 10px 0;">
-					Please only choose a language that your client supports
-				</p>
-				<div class="select-box">
-					<div>
-						<a class="nolang selected" id="nl">Server Default</a>
-						<a class="de" id="lde">Deutsch</a>
-						<a class="us" id="lus">American</a>
-						<a class="uk" id="luk">British</a>
+				<div class="centered">
+					<span class="infotext">Client Path:</span><br>
+					<input type="text" id="CP" class="text"></input>
+					<a class="btn" id="chooseClient">BROWSE...</a>
+				</div>
+				<div class="centered">
+					<span class="infotext">Language:</span>
+					<div class="select-box">
+						<div>
+							<a class="nolang selected" id="nl">Server Default</a>
+							<a class="de" id="lde">Deutsch</a>
+							<a class="us" id="lus">American</a>
+							<a class="uk" id="luk">British</a>
+						</div>
 					</div>
 				</div>
+				<p style="font-size: 12px; font-weight: bold; padding: 0 40px; margin: 2px 0 0 0;">
+					Please only choose a language that your client supports
+				</p>
 			</div>
 		</div>
 		<script>

@@ -25,6 +25,7 @@ Partial Class Form1
         Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.WebControl1 = New Awesomium.Windows.Forms.WebControl(Me.components)
+        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         Me.SuspendLayout()
         '
         'WebControl1
@@ -34,6 +35,12 @@ Partial Class Form1
         Me.WebControl1.Location = New System.Drawing.Point(0, 0)
         Me.WebControl1.Size = New System.Drawing.Size(1030, 674)
         Me.WebControl1.TabIndex = 0
+        '
+        'OpenFileDialog1
+        '
+        Me.OpenFileDialog1.DereferenceLinks = False
+        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
+        Me.OpenFileDialog1.Filter = "Lego Universe Client|legouniverse.exe"
         '
         'Form1
         '
@@ -52,5 +59,6 @@ Partial Class Form1
 
     End Sub
     Private WithEvents WebControl1 As Awesomium.Windows.Forms.WebControl
+    Friend WithEvents OpenFileDialog1 As System.Windows.Forms.OpenFileDialog
 
 End Class
